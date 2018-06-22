@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Giphy API</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input{
+      margin: 10px;
+    }
+  </style>
+
+        <!-- Style Sheets -->
+        <link rel="stylesheet" type="text/css" href="assets/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="assets/css/style.css" />
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+          crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container">
+      <!-- <div id="cover"></div> -->
+    <div class="jumbotron" id="background">
+        <h1 class="text-center">
+          <strong>Add A Topic</strong>
+        </h1>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+      <!-- Topics to be dumped here -->
+      <div id="topics-view"></div>
+
+      <!-- Rendered buttons dumped here -->
+      <div id="buttons-view"></div>
+  </div>
+  </div>
+  <br>
+
+    <div class="container">
+      <div class="row" id="form">
+              <form id="topic-form">
+              <label for="topic-input">Add a topic</label>
+              <input type= "text" id="topic-input"> 
+          </div>
+        </div>
+    <br>
+
+    <!-- Button triggers for new topic -->
+    <input id="add-topic" type="submit" value="Add a topic">
+  </form>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript">
+
+    // Initial array of topics
+  var topics = ["George Washington", "Abraham Lincoln", "Thomas Jefferson"];
+  console.log(topics);
+
+    // add event listener for buttons
+   $(document).on("click", '.topic-btn', function () {
+    var topic = $(this).attr("data-name");
+    displayGetGif(topic);
+  })
+  
+
+  function displayGetGif(topic){
+
+    //var queryURL = "http://api.giphy.com/v1/gifs/search?q=" +topic+ "&api_key=xkAPYfg3x7NSdW4S6YDcM0drMcvJ3Ns9&limit=10";
+    $("#topics-view").empty();
+
+    $.ajax({
+      url: "http://api.giphy.com/v1/gifs/search?q=" +topic+ "&api_key=xkAPYfg3x7NSdW4S6YDcM0drMcvJ3Ns9&limit=10",
+      method: "GET"
+    }).then(function(response) {
+
+    var topicDiv = $("<div class= 'topic'>");
+  
+        var results = response.data;
+        for (var i = 0; i < response.data.length; i++) {
+
+        var ratings = response.data[i].rating;
+        //console.log(response.data[i])
+        var images = response.data[i].images.downsized_still.url;
+        var toggle = response.data[i].images.original.url;
+       // console.log(ratings);
+       // console.log(images);
+        var image = $("<img>");
+
+        var pOne = $("<p>").text("Rating: " + ratings);
+        image.attr("src", images);
+        image.addClass("giph");
+        image.attr("data-state", "still");
+        image.attr("data-still", images);
+        image.attr("data-animate", toggle);
+              
+        topicDiv.append(image);
+        topicDiv.append(pOne);
+        $("#topics-view").append(topicDiv);
+        
+      }
+
+      });
+
+  }
+
+  function renderButtons(){
+      $("#buttons-view").empty();
+
+      for(var i=0; i<topics.length; i++){
+
+           var a = $("<button>" +topics[i]+ "</button>");
+          a.addClass("topic-btn");
+          a.attr("data-name", topics[i]);
+          a.text(topics[i]);
+          $("#buttons-view").append(a);
+
+      }
+  }
+
+$("#add-topic").on("click", function(event){
+    event.preventDefault();
+
+    var topic = $("#topic-input").val().trim();
+
+    topics.push(topic);
+    renderButtons();
+});
+
+ $(document).on("click", '.giph', function(){
+   console.log(this);
+  var state = $(this).attr('data-state');
+  if(state === "still"){
+      $(this).attr("src", $(this).attr("data-animate"));
+      $(this).attr("data-state", "animate");
+  }else{
+      $(this).attr("src", $(this).attr("data-still"));
+      $(this).attr("data-state", "still");
+  }
+});
+
+
+renderButtons();
+
+
+  </script>
+</div>
+
+</body>
+
+</html>
